@@ -1,4 +1,4 @@
-FROM runpod/serverless:gpu-cuda12.1
+FROM runpod/base:0.6.2-cuda12.1.0
 
 # Evita interação
 ENV DEBIAN_FRONTEND=noninteractive
