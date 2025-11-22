@@ -1,19 +1,33 @@
-FROM runpod/base:0.6.2-cuda12.1.0
+# RunPod Serverless Dockerfile para modelos HuggingFace (Phi / LoRA / Dolphin)
+FROM runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404
 
-# Evita interação
-ENV DEBIAN_FRONTEND=noninteractive
+# Diretório principal
+WORKDIR /workspace
 
-# Instalar dependências opcionais
-RUN apt-get update && apt-get install -y git && apt-get clean
+# Dependências básicas
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Atualizar pip
+RUN python3 -m pip install --upgrade pip
 
-COPY handler.py /app/handler.py
-COPY requirements.txt /app/requirements.txt
-COPY runtime.yaml /app/runtime.yaml
-COPY readme.md /app/readme.md
+# Instalar libs essenciais para modelos HF
+RUN python3 -m pip install transformers accelerate safetensors
+RUN python3 -m pip install runpod
+RUN python3 -m pip install hf-transfer
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Limpar cache pip
+RUN python3 -m pip cache purge
 
-CMD ["python3", "-u", "handler.py"]
+# Copiar handler
+COPY handler.py /workspace/handler.py
+
+# Definir o cache HF no volume persistente
+ENV HF_HOME=/runpod-volume
+ENV TRANSFORMERS_CACHE=/runpod-volume
+ENV HF_HUB_CACHE=/runpod-volume
+ENV HUGGINGFACE_HUB_CACHE=/runpod-volume
+
+# Comando de execução
+CMD ["python3", "-u", "/workspace/handler.py"]
