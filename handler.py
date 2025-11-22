@@ -17,13 +17,19 @@ def load_model():
     
     print("🚀 Carregando modelo Misa...")
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+    tokenizer = AutoTokenizer.from_pretrained(
+        MODEL_PATH,
+        local_files_only=True
+    )
 
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_PATH,
         torch_dtype=torch.float16,
-        device_map="auto"
+        device_map="auto",
+        local_files_only=True
     )
+
+
     model.eval()
 
     print("✅ Modelo carregado com sucesso!")
