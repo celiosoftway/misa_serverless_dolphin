@@ -16,4 +16,4 @@ COPY readme.md /app/readme.md
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD ["python", "-u", "handler.py"]
+CMD ["python3", "-u", "handler.py"]
