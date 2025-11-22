@@ -1,24 +1,33 @@
 import runpod
-from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-# Caminho do modelo dentro do Volume do Runpod
-MODEL_PATH = "/workspace/misa-phi"  
-# MODEL_PATH = "/runpod-volume/misa-dolphin" 
+MODEL_PATH = "/runpod-volume/misa-dolphin"
 
-print(">> Carregando tokenizer...")
-tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+# Lazy loading
+tokenizer = None
+model = None
 
-print(">> Carregando modelo...")
-model = AutoModelForCausalLM.from_pretrained(
-    MODEL_PATH,
-    torch_dtype=torch.float16,
-    device_map="auto"
-)
+def load_model():
+    global tokenizer, model
+    if tokenizer is None or model is None:
+        print(">> Carregando modelo...")
 
-model.eval()
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+
+        model = AutoModelForCausalLM.from_pretrained(
+            MODEL_PATH,
+            torch_dtype=torch.float16,
+            device_map="auto"
+        )
+
+        model.eval()
+
+    return tokenizer, model
 
 def generate_text(prompt, max_tokens=512, temperature=0.7):
+    tokenizer, model = load_model()
+
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
     output_tokens = model.generate(
@@ -31,16 +40,8 @@ def generate_text(prompt, max_tokens=512, temperature=0.7):
 
     return tokenizer.decode(output_tokens[0], skip_special_tokens=True)
 
-
 def handler(event):
-    """
-    event = {
-        "input": "Texto do usuário",
-        "max_tokens": 300,
-        "temperature": 0.7
-    }
-    """
-    prompt = event.get("input", "")
+    prompt = event.get("input")
     if not prompt:
         return {"error": "input is required"}
 
@@ -49,13 +50,8 @@ def handler(event):
 
     print(f">> Gerando resposta para: {prompt[:60]}...")
 
-    output = generate_text(
-        prompt,
-        max_tokens=max_tokens,
-        temperature=temperature
-    )
+    output = generate_text(prompt, max_tokens, temperature)
 
     return {"output": output}
-
 
 runpod.serverless.start({"handler": handler})
