@@ -1,27 +1,37 @@
-import runpod
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import os
+import time
 import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
-# Caminho do seu modelo dentro do storage persistente
-MODEL_PATH = "/runpod-volume/misa-dolphin"   
+MODEL_PATH = "/runpod-volume/misa-dolphin"
 
-# Lazy-load
 tokenizer = None
 model = None
 
+def wait_for_volume(path):
+    print(f"⏳ Aguardando volume `{path}` montar...")
+    while not os.path.exists(path):
+        time.sleep(1)
+    print("📁 Volume montado!")
+
 def load_model():
     global tokenizer, model
-    if tokenizer is not None:
+
+    # Já carregado
+    if tokenizer is not None and model is not None:
         return tokenizer, model
 
-    print(">> Carregando tokenizer/modelo a partir do disco local...")
+    # Aguarda montagem do volume
+    wait_for_volume(MODEL_PATH)
 
+    print("🚀 Carregando tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_PATH,
         local_files_only=True,
         trust_remote_code=True
     )
 
+    print("🚀 Carregando modelo...")
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_PATH,
         torch_dtype=torch.float16,
@@ -30,9 +40,10 @@ def load_model():
         trust_remote_code=True
     )
 
+    # 👇 Aqui está o que você perguntou
     model.eval()
+    print("✅ Modelo em modo de inferência (eval).")
 
-    print("✅ Modelo Misa Dolphin carregado com sucesso!")
     return tokenizer, model
 
 
