@@ -3,8 +3,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStream
 import torch
 
 # Caminho do modelo dentro do Volume do Runpod
-# MODEL_PATH = "/workspace/misa-dolphin"  
-MODEL_PATH = "/runpod-volume/misa-dolphin" 
+MODEL_PATH = "/workspace/misa-phi"  
+# MODEL_PATH = "/runpod-volume/misa-dolphin" 
 
 print(">> Carregando tokenizer...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
