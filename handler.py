@@ -11,28 +11,28 @@ model = None
 
 def load_model():
     global tokenizer, model
-    
-    if tokenizer is not None and model is not None:
+    if tokenizer is not None:
         return tokenizer, model
-    
-    print("🚀 Carregando modelo Misa...")
+
+    print(">> Carregando tokenizer/modelo a partir do disco local...")
 
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_PATH,
-        local_files_only=True
+        local_files_only=True,
+        trust_remote_code=True
     )
 
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_PATH,
         torch_dtype=torch.float16,
         device_map="auto",
-        local_files_only=True
+        local_files_only=True,
+        trust_remote_code=True
     )
-
 
     model.eval()
 
-    print("✅ Modelo carregado com sucesso!")
+    print("✅ Modelo Misa Dolphin carregado com sucesso!")
     return tokenizer, model
 
 
