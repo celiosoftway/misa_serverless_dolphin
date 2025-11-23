@@ -4,6 +4,24 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import runpod
 
+print("📂 Testando caminhos...")
+
+for p in [
+    "/runpod-volume",
+    "/runpod-volume/workspace",
+    "/workspace",
+    "/",
+]:
+    print(f"🔍 Verificando {p}: ", "existe" if os.path.exists(p) else "não existe")
+    if os.path.exists(p):
+        try:
+            print("   Conteúdo:", os.listdir(p))
+        except Exception as e:
+            print("   Erro lendo:", e)
+
+print("📂 Diagnóstico inicial concluído.\n")
+
+
 # Se você mantiver o symlink workspace -> runpod-volume:
 # MODEL_PATH = "/workspace/misa-dolphin"
 # Se estiver acessando direto o mountpoint:
