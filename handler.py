@@ -23,8 +23,6 @@ print("📂 Diagnóstico inicial concluído.\n")
 
 
 # Se você mantiver o symlink workspace -> runpod-volume:
-# MODEL_PATH = "/workspace/misa-dolphin"
-# Se estiver acessando direto o mountpoint:
 MODEL_PATH = "/runpod-volume/misa-luna-merged"
 
 tokenizer = None
